@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 /**
- * Generic Service that talks to GenericDao to CRUD
- * POJOs.
+ * Provides implementation classes for GenericService interface class.
  * 
  * @since 1.0.0
  */
-package org.anyframe.generic.service;
+package org.anyframe.generic.service.impl;
 
