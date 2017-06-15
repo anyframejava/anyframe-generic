@@ -15,8 +15,6 @@
  */
 package org.anyframe.plugin.generic.moviefinder.web;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -31,13 +29,12 @@ import org.anyframe.plugin.generic.domain.GenericMovie;
 import org.anyframe.plugin.generic.moviefinder.service.MovieService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * This MovieController class is a Controller class to provide movie crud and
@@ -47,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller("genericMovieController")
 @RequestMapping("/genericMovie.do")
+@SessionAttributes(types = GenericMovie.class)
 public class MovieController {
 
 	@Inject
@@ -71,39 +69,11 @@ public class MovieController {
 
 	@RequestMapping(params = "method=create")
 	public String create(
-			@RequestParam(value = "realPosterFile", required = false) MultipartFile posterFile,
-			@Valid GenericMovie genericMovie, BindingResult results,
-			SessionStatus status, HttpSession session) throws Exception {
+			@Valid GenericMovie genericMovie, BindingResult results, SessionStatus status,
+			HttpSession session) throws Exception {
 
-		if (results.hasErrors()) {
+		if (results.hasErrors())
 			return "generic/moviefinder/movie/form";
-		}
-
-		if (posterFile != null && !posterFile.getOriginalFilename().equals("")) {
-			String pictureName = posterFile.getOriginalFilename();
-
-			String destDir = session.getServletContext().getRealPath(
-					"/sample/images/posters/");
-
-			File dirPath = new File(destDir);
-			if (!dirPath.exists()) {
-				boolean created = dirPath.mkdirs();
-				if (!created) {
-					throw new Exception(
-							"Fail to create a directory for movie image. ["
-									+ destDir + "]");
-				}
-			}
-
-			File destination = File
-					.createTempFile("file", pictureName, dirPath);
-
-			FileCopyUtils.copy(posterFile.getInputStream(),
-					new FileOutputStream(destination));
-
-			genericMovie.setPosterFile("sample/images/posters/"
-					+ destination.getName());
-		}
 
 		this.movieService.create(genericMovie);
 		status.setComplete();
