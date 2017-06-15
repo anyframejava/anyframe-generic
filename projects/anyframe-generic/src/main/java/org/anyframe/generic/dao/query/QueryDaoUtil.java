@@ -44,8 +44,8 @@ public final class QueryDaoUtil {
 	 * Log variable for all child classes. Uses
 	 * LoggerFactory.getLogger(getClass()) from Slf4j
 	 */
-	protected static final Logger logger = LoggerFactory
-			.getLogger(QueryDaoUtil.class);
+	protected static final Logger LOGGER = LoggerFactory
+			.getLogger(QueryDaoUtil.class); 
 
 	private static Map<String, XProperty> primaryKeyPropertyMap = new HashMap<String, XProperty>();
 
@@ -84,7 +84,7 @@ public final class QueryDaoUtil {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Could not find primary key of {} ",
+			LOGGER.error("Could not find primary key of {} ",
 					new Object[] { clazzName });
 		}
 
@@ -121,7 +121,7 @@ public final class QueryDaoUtil {
 					(Class[]) null);
 			return getMethod.invoke(o, (Object[]) null);
 		} catch (Exception e) {
-			logger.error("Could not invoke method '{}' on {}", new Object[] {
+			LOGGER.error("Could not invoke method '{}' on {}", new Object[] {
 					getterMethod, ClassUtils.getShortName(o.getClass()) });
 		}
 		return null;
@@ -137,8 +137,7 @@ public final class QueryDaoUtil {
 	 * @param value
 	 *            the value of the new primary key
 	 */
-	@SuppressWarnings("rawtypes")
-	protected static void setPrimaryKey(Object o, Class clazz, Object value) {
+	protected static void setPrimaryKey(Object o, Class<?> clazz, Object value) {
 		String fieldName = getPrimaryKeyFieldName(o);
 		String setMethodName = "set"
 				+ Character.toUpperCase(fieldName.charAt(0))
@@ -150,12 +149,11 @@ public final class QueryDaoUtil {
 				setMethod.invoke(o, value);
 			}
 		} catch (Exception e) {
-			logger.error(MessageFormat.format(
+			LOGGER.error(MessageFormat.format(
 					"Could not set ''{}.{} with value {}", new Object[] {
 							ClassUtils.getShortName(o.getClass()), fieldName,
 							value }));
 
 		}
 	}
-
 }

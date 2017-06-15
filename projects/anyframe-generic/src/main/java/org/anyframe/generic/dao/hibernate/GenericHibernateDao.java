@@ -20,7 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import org.anyframe.datatype.SearchVO;
-import org.anyframe.exception.BaseException;
+import org.anyframe.exception.NoResultException;
 import org.anyframe.generic.dao.GenericDao;
 import org.anyframe.hibernate.DynamicHibernateService;
 import org.anyframe.pagination.Page;
@@ -144,7 +144,7 @@ public class GenericHibernateDao<T, PK extends Serializable> implements
 		T entity = (T) hibernateTemplate.get(this.persistentClass, id);
 
 		if (entity == null)
-			throw new BaseException("'" + this.persistentClass
+			throw new NoResultException("'" + this.persistentClass
 					+ "' object with id '" + id + "' not found");
 
 		return entity;
@@ -244,13 +244,12 @@ public class GenericHibernateDao<T, PK extends Serializable> implements
 	 * </pre>
 	 * 
 	 */
-	@SuppressWarnings("rawtypes")
 	public Page getPagingList(SearchVO searchVO) throws Exception {
 		int pageIndex = searchVO.getPageIndex();
 
-		String searchCondition = StringUtil.null2str(searchVO
+		String searchCondition = StringUtil.nullToString(searchVO
 				.getSearchCondition());
-		String searchKeyword = StringUtil.null2str(searchVO.getSearchKeyword());
+		String searchKeyword = StringUtil.nullToString(searchVO.getSearchKeyword());
 		String isNumeric = NumberUtil.isNumber(searchKeyword) ? "true"
 				: "false";
 
@@ -260,7 +259,7 @@ public class GenericHibernateDao<T, PK extends Serializable> implements
 		args[2] = "keywordNum=" + searchKeyword + "";
 		args[3] = "isNumeric=" + isNumeric;
 
-		List resultList = this.getDynamicHibernateService()
+		List<?> resultList = this.getDynamicHibernateService()
 				.findList(
 						"find" + ClassUtils.getShortName(getPersistentClass())
 								+ "List", args, pageIndex, pageSize);
@@ -277,18 +276,17 @@ public class GenericHibernateDao<T, PK extends Serializable> implements
 	 * {@inheritDoc}
 	 */
 	public Page getPagingList(T object, int pageIndex) throws Exception {
-		throw new BaseException("Method is not supported.");
+		throw new UnsupportedOperationException("Method is not supported.");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	public List<T> getList(SearchVO searchVO) throws Exception {
 
-		String searchCondition = StringUtil.null2str(searchVO
+		String searchCondition = StringUtil.nullToString(searchVO
 				.getSearchCondition());
-		String searchKeyword = StringUtil.null2str(searchVO.getSearchKeyword());
+		String searchKeyword = StringUtil.nullToString(searchVO.getSearchKeyword());
 		String isNumeric = NumberUtil.isNumber(searchKeyword) ? "true"
 				: "false";
 
@@ -308,7 +306,6 @@ public class GenericHibernateDao<T, PK extends Serializable> implements
 	 * {@inheritDoc}
 	 */
 	public List<T> getList(T object) throws Exception {
-		throw new BaseException("Method is not supported.");
+		throw new UnsupportedOperationException("Method is not supported.");
 	}
-
 }

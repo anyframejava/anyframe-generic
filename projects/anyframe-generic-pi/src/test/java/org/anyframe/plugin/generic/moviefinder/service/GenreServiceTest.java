@@ -45,7 +45,7 @@ public class GenreServiceTest {
 	@Test
 	public void testGenreGetList() throws Exception {
 		SearchVO searchVO = new SearchVO();
-		List list = genericGenreService.getList(searchVO);
+		List<GenericGenre> list = genericGenreService.getList(searchVO);
 
 		Assert.assertEquals(10, list.size());
 	}

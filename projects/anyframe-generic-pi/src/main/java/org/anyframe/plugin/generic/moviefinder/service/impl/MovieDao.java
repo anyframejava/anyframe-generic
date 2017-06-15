@@ -42,6 +42,6 @@ public class MovieDao extends GenericQueryDao<GenericMovie, String> {
 
 	public void create(GenericMovie genericMovie) throws Exception {
 		genericMovie.setMovieId("MV-" + System.currentTimeMillis());
-		create("createGenericMovie", genericMovie);
+		super.create("createGenericMovie", genericMovie);
 	}
 }

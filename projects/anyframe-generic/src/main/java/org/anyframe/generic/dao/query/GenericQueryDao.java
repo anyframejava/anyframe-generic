@@ -20,10 +20,11 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import org.anyframe.datatype.SearchVO;
-import org.anyframe.exception.BaseException;
+import org.anyframe.exception.NoResultException;
 import org.anyframe.generic.dao.GenericDao;
 import org.anyframe.pagination.Page;
 import org.anyframe.query.dao.QueryServiceDaoSupport;
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.util.NumberUtil;
 import org.anyframe.util.StringUtil;
 import org.slf4j.Logger;
@@ -45,8 +46,8 @@ import org.springframework.util.ClassUtils;
  * @param <PK>
  *            the primary key for that type
  */
-public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDaoSupport
-		implements GenericDao<T, PK> {
+public class GenericQueryDao<T, PK extends Serializable> extends
+		QueryServiceDaoSupport implements GenericDao<T, PK> {
 
 	@Value("#{contextProperties['pageSize'] ?: 10}")
 	int pageSize;
@@ -100,8 +101,8 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 
 	private Object getObject(PK id) throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
-		Object obj = Thread.currentThread().getContextClassLoader()
-				.loadClass(this.persistentClass.getName()).newInstance();
+		Object obj = Thread.currentThread().getContextClassLoader().loadClass(
+				this.persistentClass.getName()).newInstance();
 		QueryDaoUtil.setPrimaryKey(obj, id.getClass(), id);
 		return obj;
 	}
@@ -111,11 +112,17 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 	 */
 	@SuppressWarnings("unchecked")
 	public T get(PK id) throws Exception {
-		T object = (T) findByPk("find" + ClassUtils.getShortName(this.persistentClass) + "ByPk",
-				getObject(id));
+		T object;
+		try {
+			object = (T) findByPk("find"
+					+ ClassUtils.getShortName(this.persistentClass) + "ByPk",
+					getObject(id));
+		} catch (Exception e) {
+			throw new QueryException("Cannot get object", e);
+		}
 
 		if (object == null)
-			throw new BaseException("'" + this.persistentClass
+			throw new NoResultException("'" + this.persistentClass
 					+ "' object with id '" + id + "' not found");
 
 		return object;
@@ -126,8 +133,15 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean exists(PK id) throws Exception {
-		T object = (T) findByPk("find" + ClassUtils.getShortName(this.persistentClass) + "ByPk",
-				getObject(id));
+		T object;
+		try {
+			object = (T) findByPk("find"
+					+ ClassUtils.getShortName(this.persistentClass) + "ByPk",
+					getObject(id));
+		} catch (Exception e) {
+			throw new QueryException("Cannot get object", e);
+		}
+
 		return object != null;
 	}
 
@@ -151,7 +165,12 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 	 * {@inheritDoc}
 	 */
 	public void remove(PK id) throws Exception {
-		remove("remove" + ClassUtils.getShortName(this.persistentClass), getObject(id));
+		try {
+			remove("remove" + ClassUtils.getShortName(this.persistentClass),
+					getObject(id));
+		} catch (Exception e) {
+			throw new QueryException("Cannot get object", e);
+		}
 	}
 
 	/**
@@ -213,9 +232,10 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 	public Page getPagingList(SearchVO searchVO) throws Exception {
 		int pageIndex = searchVO.getPageIndex();
 
-		String searchCondition = StringUtil.null2str(searchVO
+		String searchCondition = StringUtil.nullToString(searchVO
 				.getSearchCondition());
-		String searchKeyword = StringUtil.null2str(searchVO.getSearchKeyword());
+		String searchKeyword = StringUtil.nullToString(searchVO
+				.getSearchKeyword());
 		String isNumeric = NumberUtil.isNumber(searchKeyword) ? "true"
 				: "false";
 
@@ -225,28 +245,28 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 		args[2] = "keywordNum=" + searchKeyword + "";
 		args[3] = "isNumeric=" + isNumeric;
 
-		return this.findListWithPaging("find" + 
-				ClassUtils.getShortName(getPersistentClass()) + "List", args, pageIndex,
-				pageSize, pageUnit);
+		return this.findListWithPaging("find"
+				+ ClassUtils.getShortName(getPersistentClass()) + "List", args,
+				pageIndex, pageSize, pageUnit);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Page getPagingList(T object, int pageIndex) throws Exception {
-		return this.findListWithPaging("find" + 
-				ClassUtils.getShortName(getPersistentClass()) + "List", object,
-				pageIndex, pageSize);
+		return this.findListWithPaging("find"
+				+ ClassUtils.getShortName(getPersistentClass()) + "List",
+				object, pageIndex, pageSize);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<T> getList(SearchVO searchVO) throws Exception {
-		String searchCondition = StringUtil.null2str(searchVO
+		String searchCondition = StringUtil.nullToString(searchVO
 				.getSearchCondition());
-		String searchKeyword = StringUtil.null2str(searchVO.getSearchKeyword());
+		String searchKeyword = StringUtil.nullToString(searchVO
+				.getSearchKeyword());
 		String isNumeric = NumberUtil.isNumber(searchKeyword) ? "true"
 				: "false";
 
@@ -255,18 +275,17 @@ public class GenericQueryDao<T, PK extends Serializable> extends QueryServiceDao
 		args[1] = "keywordStr=%" + searchKeyword + "%";
 		args[2] = "keywordNum=" + searchKeyword + "";
 		args[3] = "isNumeric=" + isNumeric;
-
-		return (List) this.findList("find" + 
-				ClassUtils.getShortName(this.persistentClass) + "List", args);
+		
+		return this.findList("find"
+				+ ClassUtils.getShortName(this.persistentClass) + "List", args);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<T> getList(T object) throws Exception {
-		return (List) this.findList("find" + 
-				ClassUtils.getShortName(this.persistentClass) + "List", object);
+		return this.findList("find"
+				+ ClassUtils.getShortName(this.persistentClass) + "List",
+				object);
 	}
-
 }
