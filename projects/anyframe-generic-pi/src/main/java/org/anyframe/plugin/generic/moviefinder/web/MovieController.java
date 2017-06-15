@@ -75,7 +75,7 @@ public class MovieController {
 		if (results.hasErrors())
 			return "generic/moviefinder/movie/form";
 
-		movieService.create(genericMovie);
+		this.movieService.create(genericMovie);
 		status.setComplete();
 
 		return "redirect:/genericMovieFinder.do?method=list";
@@ -84,7 +84,7 @@ public class MovieController {
 	@RequestMapping(params = "method=get")
 	public String get(@RequestParam("movieId") String movieId, Model model)
 			throws Exception {
-		GenericMovie genericMovie = movieService.get(movieId);
+		GenericMovie genericMovie = this.movieService.get(movieId);
 		if (genericMovie == null) {
 			throw new Exception("Resource not found " + movieId);
 		}
@@ -101,7 +101,7 @@ public class MovieController {
 			return "generic/moviefinder/movie/form";
 		}
 
-		movieService.update(genericMovie);
+		this.movieService.update(genericMovie);
 		status.setComplete();
 
 		return "redirect:/genericMovieFinder.do?method=list";
@@ -110,7 +110,7 @@ public class MovieController {
 	@RequestMapping(params = "method=remove")
 	public String remove(@RequestParam("movieId") String movieId)
 			throws Exception {
-		movieService.remove(movieId);
+		this.movieService.remove(movieId);
 		return "redirect:/genericMovieFinder.do?method=list";
 	}
 }

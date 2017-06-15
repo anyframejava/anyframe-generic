@@ -23,6 +23,7 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.anyframe.exception.BaseException;
 import org.anyframe.pagination.Page;
 import org.anyframe.plugin.generic.domain.GenericGenre;
 import org.anyframe.plugin.generic.domain.GenericMovie;
@@ -31,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This MovieServiceTest class is a Test Case class for MovieService.
@@ -47,7 +47,6 @@ public class MovieServiceTest {
 	private MovieService movieService;
 
 	@Test
-	@Transactional(value = "txManager")
 	@Rollback(value = true)
 	public void manageMovie() throws Exception {
 		// 1. create a new movie
@@ -76,7 +75,7 @@ public class MovieServiceTest {
 		// 6. assert - remove
 		try {
 			movieService.get(movie.getMovieId());
-		} catch (Exception e) {
+		} catch (BaseException e) {
 			assertEquals("fail to remove a movie.",
 					"'class org.anyframe.plugin.generic.domain.GenericMovie' object with id '"
 							+ movie.getMovieId() + "' not found", e

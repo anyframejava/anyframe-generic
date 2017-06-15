@@ -40,8 +40,8 @@ public class MovieDao extends GenericQueryDao<GenericMovie, String> {
 		super.setPersistentClass(GenericMovie.class);
 	}
 
-	public void create(GenericMovie genericMovie) throws Exception {
+	public void create(GenericMovie genericMovie) {
 		genericMovie.setMovieId("MV-" + System.currentTimeMillis());
-		super.create("createGenericMovie", genericMovie);
+		create("createGenericMovie", genericMovie);
 	}
 }
