@@ -1,0 +1,5 @@
+org.anyframe.generic.dao
+org.anyframe.generic.dao.hibernate
+org.anyframe.generic.dao.query
+org.anyframe.generic.service
+org.anyframe.generic.service.impl
